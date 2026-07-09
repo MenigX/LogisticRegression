@@ -43,5 +43,6 @@ class Metrics:
         return -(Y_true @ np.log(Y_pred) + (1 - Y_true) @ np.log(1 - Y_pred)) / Y_true.shape[0]
     
     @staticmethod
-    def s_log_loss(pred, true):
-        return -(true * np.log(pred) + (1 - true) * np.log(pred))
+    def s_log_loss(pred, true, eps=1e-15):
+        pred = np.clip(pred, eps, 1-eps)
+        return -(true * np.log(pred) + (1 - true) * np.log(1 - pred))
