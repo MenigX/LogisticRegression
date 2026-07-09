@@ -1,4 +1,5 @@
 import numpy as np
+import random as rnd
 from .metrics import Metrics
 
 class LogisticRegression:
@@ -14,19 +15,25 @@ class LogisticRegression:
     def predict(self, X):
         return self.sigmoid(X @ self.weights + self.bias)
     
-    def fit(self, X, Y_true, learning_rate=0.05, epochs=1000):
+    def fit(self, X, Y_true, learning_rate=0.05, epochs=1000, beta=0.01, eps=0.4, log_p=10):
         logs = []
+        risk = np.mean(Metrics.log_loss(self.predict(X), Y_true))
         for epoch in range(1, epochs + 1):
-            Y_pred = self.predict(X)
-            delta = Y_pred - Y_true
-            dw = (X.T @ delta) / Y_true.shape[0]
-            db = np.sum(delta) / Y_true.shape[0]
+            i = rnd.randint(0, X.shape[0] - 1)
+            Y_pred = self.predict(X[i])
+            delta = Y_pred - Y_true[i]
+            dw = (X[i] * delta)
+            db = delta
             self.weights -= learning_rate * dw
             self.bias -= learning_rate * db
-            if epoch % 100 == 0:
-                logs.append(f'Epoch: {epoch}, Loss: {Metrics.log_loss(Y_pred, Y_true)}\n')
-        self.save_logs(logs)
+            loss = Metrics.s_log_loss(Y_pred, Y_true[i])
+            risk = beta * loss + (1 - beta) * risk
+            if epoch % log_p == 0:
+                logs.append(f'Epoch: {epoch}, Loss: {risk}\n')
+            if risk <= eps:
+                break
+        self._save_logs(logs)
     
-    def save_logs(self, logs):
+    def _save_logs(self, logs):
         with open(self.log_path, 'w') as file:
             file.write(''.join(logs))

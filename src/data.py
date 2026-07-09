@@ -34,9 +34,9 @@ class Data:
             "num_dependents": None,
         }
 
-        self.data_preprocess()
+        self._data_preprocess()
 
-    def data_preprocess(self):
+    def _data_preprocess(self):
         self.df = pd.get_dummies(self.df, columns=self.columns_d, drop_first=True)
         
         for col, categories in self.columns_o.items():
